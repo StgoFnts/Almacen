@@ -25,6 +25,7 @@ public class VistaStock extends javax.swing.JFrame {
         label_peso = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         button_agregar.setText("Agregar");
 

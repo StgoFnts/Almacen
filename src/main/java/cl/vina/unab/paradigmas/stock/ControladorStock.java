@@ -200,10 +200,13 @@ public class ControladorStock {
                 int stock = Integer.parseInt(frame.textfield_stock.getText());
                 
                 if (stock < 1) {
-                   JOptionPane.showMessageDialog(frame, "Error: Ingresa un valor mayor a 0"); 
+                   JOptionPane.showMessageDialog(frame, "Error: Ingresa un valor mayor a 0");
+                   return;
                 }
+                peso_total -= stock_bodega.getPeso()*stock_anterior;
+                volumen_total -= stock_bodega.getVolumen()*stock_anterior;
                 // Comparar intento de cambio de stock
-                else if (checkSpaceLimits(stock_bodega.getIdProducto(), stock)) {
+                if (checkSpaceLimits(stock_bodega.getIdProducto(), stock)) {
                     // Si cambio de stock no infrige parametros maximos de bodega, cambiarlo en objeto
                     stock_bodega.setStock(stock);
                     
@@ -212,8 +215,7 @@ public class ControladorStock {
                         // Actualizar valores totales del peso y volumen con el stock editado
                         // Esto permite que si el stock editado es menor o mayor, se quite primero los valores anteriores
                         // y se agreguen los (posibles) nuevos.
-                        peso_total -= stock_bodega.getPeso()*stock_anterior;
-                        volumen_total -= stock_bodega.getVolumen()*stock_anterior;
+                        
                         
                         float peso_actualizado = stock_bodega.getPeso() * stock_bodega.getStock();
                         peso_total += peso_actualizado;
@@ -235,6 +237,10 @@ public class ControladorStock {
                         JOptionPane.showMessageDialog(frame, "Error: Stock de producto no pudo ser actualizado");
                     }
                     frame.setVisible(false);
+                }
+                else {
+                    peso_total += stock_bodega.getPeso()*stock_anterior;
+                    volumen_total += stock_bodega.getVolumen()*stock_anterior;
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(frame, "Error: Ingresa valor(es) numerico(s)");

@@ -23,6 +23,7 @@ public class VistaVendedor extends javax.swing.JFrame {
         table_vendedor = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Interfaz Vendedores");
 
         button_crear.setText("Contratar");
 

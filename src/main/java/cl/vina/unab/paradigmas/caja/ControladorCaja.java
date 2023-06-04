@@ -257,7 +257,7 @@ public class ControladorCaja {
                 vista_caja.combobox_cajas.setSelectedItem(panel);
             }
             else {
-                JOptionPane.showMessageDialog(null, "Error: No hay productos en este almacen");
+                JOptionPane.showMessageDialog(null, "Error: No hay productos en las bodegas de este almacen");
             }
         }
         else {
@@ -339,7 +339,7 @@ public class ControladorCaja {
                 ((DefaultTableModel) panel.table_carrito.getModel()).removeRow(producto.getRow());
                 frame.setVisible(false);
             });
-
+            
             frame.setVisible(true);
         }
     }

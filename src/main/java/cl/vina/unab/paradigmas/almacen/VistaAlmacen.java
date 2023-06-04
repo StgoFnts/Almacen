@@ -25,6 +25,9 @@ public class VistaAlmacen extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Interfaz Almacenes");
+
+        jPanel1.setToolTipText("");
 
         button_editar.setText("Editar");
         button_editar.setBorder(javax.swing.BorderFactory.createTitledBorder(""));

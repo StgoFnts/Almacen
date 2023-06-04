@@ -192,7 +192,6 @@ public class ControladorAlmacen {
             "</html>"
         );
         
-        frame.setTitle(almacen.getNombre());
         frame.setVisible(true);
     }
     

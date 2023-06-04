@@ -24,6 +24,7 @@ public class VistaBodega extends javax.swing.JFrame {
         label_bodega = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Interfaz Bodegas");
         setResizable(false);
 
         button_deshabilitar.setText("Deshabilitar");

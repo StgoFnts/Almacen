@@ -44,7 +44,7 @@ public class ModeloProducto {
     //Sobreescribir funcion toString, de forma que al llamar al objeto en combobox, envie el nombre
     @Override
     public String toString() {
-        return abs(this.id) + " - " +this.nombre;
+        return "ID: "+abs(this.id) + " - Nombre: " +this.nombre;
     }
 
     public void setNombre(String nombre) {
