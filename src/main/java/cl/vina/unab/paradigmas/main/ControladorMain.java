@@ -1,7 +1,9 @@
 package cl.vina.unab.paradigmas.main;
 
+import cl.vina.unab.paradigmas.main.utilidades.VistaLogin;
 import cl.vina.unab.paradigmas.almacen.ControladorAlmacen;
 import cl.vina.unab.paradigmas.producto.ControladorProducto;
+import cl.vina.unab.paradigmas.vendedor.ControladorVendedor;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,21 +12,50 @@ import javax.swing.JOptionPane;
 
 public class ControladorMain {
     
-    private ModeloMain modelo_main;
-    public VistaMain vista_main;
-    
-    private String DATABASE_USER;
-    private String DATABASE_PASSWORD;
+    private DaoMain dao_main;
+    private VistaMain vista_main;
     
     public ControladorMain() {
         vista_main = new VistaMain();
         openConfigFile();       
     }
-
+    
+    public void initializationMain() {
+                
+        vista_main.button_almacenes.addActionListener((e) -> {
+            vista_main.setVisible(false);
+            new ControladorAlmacen(
+                vista_main, 
+                dao_main.getDatabaseUser(), 
+                dao_main.getDatabasePassword()
+            ).initializationAlmacen();
+        });
+        
+        vista_main.button_productos.addActionListener((e) -> {
+            vista_main.setVisible(false);
+            new ControladorProducto(
+                vista_main,
+                dao_main.getDatabaseUser(), 
+                dao_main.getDatabasePassword()
+            ).initializationProducto();
+        });
+        
+        vista_main.button_vendedores.addActionListener((e) -> {
+            vista_main.setVisible(false);
+            new ControladorVendedor(
+                vista_main,
+                dao_main.getDatabaseUser(), 
+                dao_main.getDatabasePassword()
+            ).initializationVendedor();
+        });
+        
+        vista_main.setVisible(true);
+    }
+    
     // Funciones que se llaman entre si mismas, (siendo como un ciclo) hasta que
     // sea posible ingresar a la base de datos
     private void createConfigFile() {
-        LoginVista vista_login = new LoginVista();
+        VistaLogin vista_login = new VistaLogin();
         // Agregar action listener
         vista_login.button_enviar.addActionListener((e) -> {
             try (FileWriter credenciales = new FileWriter("app.cfg")) {
@@ -47,20 +78,15 @@ public class ControladorMain {
             Properties propiedades = new Properties();
             propiedades.load(credenciales);
             
-            modelo_main = new ModeloMain(propiedades.getProperty("user"), propiedades.getProperty("pass"));
-            
+            dao_main = new DaoMain(propiedades.getProperty("user"),propiedades.getProperty("pass"));
+
             // Probar conexion, si es true, es porque hubo un fallo
-            if (modelo_main.testConnection()) {
-                // Guardar credenciales para poder entregarselas al resto de controladores
-                DATABASE_USER = modelo_main.getDatabaseUser();
-                DATABASE_PASSWORD = modelo_main.getDatabasePassword();
-            }
-            else {
+            if (!dao_main.testConnection()) {
                 JOptionPane.showMessageDialog(null, "Usuario o contraseña mal ingresada(s)");
-                
                 // Llevar a login vista
                 createConfigFile();
             }
+
         }
         catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Ingrese credenciales de base de datos");
@@ -68,28 +94,8 @@ public class ControladorMain {
         }
     }
     
-    public void initializationMain() {
-                
-        vista_main.button_almacenes.addActionListener((e) -> {
-            vista_main.setVisible(false);
-            new ControladorAlmacen(DATABASE_USER, DATABASE_PASSWORD).initializationAlmacen();
-        });
-        
-        vista_main.button_productos.addActionListener((e) -> {
-            vista_main.setVisible(false);
-            new ControladorProducto(vista_main, DATABASE_USER, DATABASE_PASSWORD).initializationProducto();
-        });
-        
-        vista_main.button_vendedores.addActionListener((e) -> {
-            vista_main.setVisible(false);
-            //new ControladorCaja(DATABASE_USER, DATABASE_PASSWORD).initializationCaja();
-        });
-        
-        vista_main.setVisible(true);
-    }
-    
     public static void main(String[] args) {
-        new ControladorMain().initializationMain();
+        new ControladorMain().initializationMain();       
     }
     
 }

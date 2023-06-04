@@ -1,9 +1,14 @@
 package cl.vina.unab.paradigmas.producto;
 
+import cl.vina.unab.paradigmas.main.utilidades.DisabledColorTableCellRenderer;
+
 public class VistaProducto extends javax.swing.JFrame {
 
     public VistaProducto() {
         initComponents();
+        // Ocultar columna, aunque en el modelo sigue existiendo
+        table_productos.removeColumn(table_productos.getColumn("IDREAL"));
+        table_productos.setDefaultRenderer(Object.class, new DisabledColorTableCellRenderer());
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -17,6 +22,7 @@ public class VistaProducto extends javax.swing.JFrame {
         table_productos = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         button_deshabilitar.setText("Deshabilitar");
 
@@ -31,11 +37,11 @@ public class VistaProducto extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "NOMBRE", "PRECIO (clp)", "PESO [gr]", "VOLUMEN [cm3]"
+                "IDREAL", "ID", "NOMBRE", "PRECIO (clp)", "PESO [gr]", "VOLUMEN [cm3]"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -46,8 +52,10 @@ public class VistaProducto extends javax.swing.JFrame {
         jScrollPane1.setViewportView(table_productos);
         if (table_productos.getColumnModel().getColumnCount() > 0) {
             table_productos.getColumnModel().getColumn(0).setResizable(false);
-            table_productos.getColumnModel().getColumn(0).setPreferredWidth(5);
-            table_productos.getColumnModel().getColumn(1).setPreferredWidth(200);
+            table_productos.getColumnModel().getColumn(0).setPreferredWidth(0);
+            table_productos.getColumnModel().getColumn(1).setResizable(false);
+            table_productos.getColumnModel().getColumn(1).setPreferredWidth(5);
+            table_productos.getColumnModel().getColumn(2).setPreferredWidth(200);
         }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -89,7 +97,9 @@ public class VistaProducto extends javax.swing.JFrame {
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {button_crear, button_deshabilitar, button_editar, button_volver});
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton button_crear;
     public javax.swing.JButton button_deshabilitar;
