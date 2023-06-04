@@ -1,8 +1,8 @@
 package cl.vina.unab.paradigmas.stock;
 
 import cl.vina.unab.paradigmas.bodega.ModeloBodega;
-import cl.vina.unab.paradigmas.main.utilidades.SelectFrame;
-import cl.vina.unab.paradigmas.main.utilidades.SelectItem;
+import cl.vina.unab.paradigmas.utilidades.SelectFrame;
+import cl.vina.unab.paradigmas.utilidades.SelectItem;
 import cl.vina.unab.paradigmas.producto.ModeloProducto;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
@@ -34,13 +34,12 @@ public class ControladorStock {
     public void initializationStock() {
         if (dao_stock.select(lista_stocks, lista_productos, bodega.getId())) {
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_stock.table_stock.getModel();
-            
-            for (int i = 0; i < lista_stocks.size(); i++) {
-                ModeloStock stock_bodega = lista_stocks.get(i);
-                
+            // Por cada stock de productos en la lista stock
+            for (ModeloStock stock_bodega : lista_stocks) {
+                // Incrementar peso y volumen total
                 peso_total += stock_bodega.getPeso() * stock_bodega.getStock();
                 volumen_total += stock_bodega.getVolumen() * stock_bodega.getStock();
-                
+                // Insertar en tabla
                 modelo_tabla.addRow(new Object[] {
                     stock_bodega.getIdProducto(),
                     abs(stock_bodega.getIdProducto()),
@@ -50,7 +49,7 @@ public class ControladorStock {
                     stock_bodega.getVolumen() * stock_bodega.getStock()
                 });
             }
-            
+            // Inicializar action listeners
             vista_stock.button_agregar.addActionListener((e) -> {
                 showAddFrame();  //Ir a la ventana agregar
             });
@@ -73,8 +72,9 @@ public class ControladorStock {
                 "   <h2 style='text-align: center;'>Bodega N°"+bodega.getId()+"</h2>"+
                 "</html>"
             );
-            
+            // Actualizar labels que muestran los limites de la bodega, peso y volumen
             updateBodegaLimitsLabels();
+            // Mostrar vista
             vista_stock.setVisible(true);
         }
         else {
@@ -84,28 +84,29 @@ public class ControladorStock {
     
     private void showSelectFrame(String title, boolean is_deleting) {
         SelectFrame frame = new SelectFrame();
-        
+        // Por cada stock producto en lista stocks
         for (int i = 0; i < lista_stocks.size(); i++) {
+            // Si la id es mayor a 0 o si es que se esta eliminando
             if (lista_stocks.get(i).getIdProducto() > 0 || is_deleting) {
                 frame.combobox_select.addItem(new SelectItem(lista_stocks.get(i), i));
             }
         }
         
+        // Si el combobox es mayor a 0
         if (frame.combobox_select.getItemCount() > 0) {
+            // Action listener que, dependiendo si se esta elimnando o no, cambia su comportamiento
             frame.button_seleccionar.addActionListener((e) -> {
                 frame.setVisible(false);
-
-                ModeloStock stock_producto_bodega = (ModeloStock) ((SelectItem) frame.combobox_select.getSelectedItem()).getObject();
+                // Obtener stock
+                ModeloStock stock_bodega = (ModeloStock) ((SelectItem) frame.combobox_select.getSelectedItem()).getObject();
                 int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();
 
                 if (is_deleting) {
-                    deleteStock(title, stock_producto_bodega, row);
+                    deleteStock(title, stock_bodega, row);  // Eliminar
                 }
                 else {
-                    showUpdateFrame(title, stock_producto_bodega, row);
+                    showUpdateFrame(title, stock_bodega, row);  // o editar
                 }
-
-                vista_stock.table_stock.setRowSelectionInterval(row, 0);
             });
 
             // Luego de que se haya creado el listener, se inicializa la vista
@@ -121,13 +122,14 @@ public class ControladorStock {
    
     private void showAddFrame() {
         VistaAddStock frame = new VistaAddStock();
-        
+        // Obtener modelo
         DefaultTableModel modelo_tabla = (DefaultTableModel) frame.table_productos.getModel();
-        for (ModeloProducto producto : lista_productos) {            
+        for (ModeloProducto producto : lista_productos) {
+            // Insertar cada producto disponible en combobox
             if (producto.getId() > 0) {
                 frame.combobox_idProducto.addItem(producto);
             }
-                    
+            // Introducir en tabla cada producto
             modelo_tabla.addRow(new Object[] {
                 producto.getId(),
                 abs(producto.getId()),
@@ -136,7 +138,7 @@ public class ControladorStock {
                 producto.getVolumen()
             });
         }
-        
+        // Si combobox es mayor a 0
         if (frame.combobox_idProducto.getItemCount() > 0) {
             frame.button_enviar.addActionListener((e) -> {
                 try {
@@ -148,23 +150,23 @@ public class ControladorStock {
                     }
                     else if (checkSpaceLimits(producto.getId(), stock)) {
                         ModeloStock stock_bodega = new ModeloStock(producto.getId(), stock);
-
+                        // Insertar en base de datos
                         if (dao_stock.insert(stock_bodega, bodega.getId())) {
                             // Actualizar valores totales del peso y volumen con el stock agregado
                             // Y actualizar los labels
                             peso_total += stock_bodega.getPeso()*stock;
                             volumen_total += stock_bodega.getVolumen()*stock;
                             updateBodegaLimitsLabels();
-
+                            // Insertar stock nuevo en lista
                             lista_stocks.add(stock_bodega);
-
+                            // Insertar en tabla
                             ((DefaultTableModel) vista_stock.table_stock.getModel()).addRow(new Object [] {
                                 stock_bodega.getIdProducto(),
                                 abs(stock_bodega.getIdProducto()),
                                 stock_bodega.getNombre(),
                                 stock_bodega.getStock(),
-                                stock_bodega.getPeso(),
-                                stock_bodega.getVolumen()
+                                stock_bodega.getPeso() * stock_bodega.getStock(),
+                                stock_bodega.getVolumen() * stock_bodega.getStock()
                             });
 
                             JOptionPane.showMessageDialog(frame, "Stock de producto agregado");
@@ -189,9 +191,9 @@ public class ControladorStock {
         }
     }
      
-    private void showUpdateFrame(String title, ModeloStock stock_producto_bodega, int row) {
+    private void showUpdateFrame(String title, ModeloStock stock_bodega, int row) {
         VistaUpdateStock frame = new VistaUpdateStock();
-        int stock_anterior = stock_producto_bodega.getStock();
+        int stock_anterior = stock_bodega.getStock();   // Guardar stock anterior, para que solamente cuando se compare, se cambie
         
         frame.button_enviar.addActionListener((e) -> {
             try {
@@ -200,29 +202,30 @@ public class ControladorStock {
                 if (stock < 1) {
                    JOptionPane.showMessageDialog(frame, "Error: Ingresa un valor mayor a 0"); 
                 }
-                else if (checkSpaceLimits(stock_producto_bodega.getIdProducto(), stock)) {
+                // Comparar intento de cambio de stock
+                else if (checkSpaceLimits(stock_bodega.getIdProducto(), stock)) {
+                    // Si cambio de stock no infrige parametros maximos de bodega, cambiarlo en objeto
+                    stock_bodega.setStock(stock);
                     
-                    stock_producto_bodega.setStock(stock);
-                    
-                    if (dao_stock.update(stock_producto_bodega, bodega.getId())) {
+                    if (dao_stock.update(stock_bodega, bodega.getId())) {
                         // Restar valores del stock anterior
                         // Actualizar valores totales del peso y volumen con el stock editado
                         // Esto permite que si el stock editado es menor o mayor, se quite primero los valores anteriores
                         // y se agreguen los (posibles) nuevos.
-                        peso_total -= stock_producto_bodega.getPeso()*stock_anterior;
-                        volumen_total -= stock_producto_bodega.getVolumen()*stock_anterior;
+                        peso_total -= stock_bodega.getPeso()*stock_anterior;
+                        volumen_total -= stock_bodega.getVolumen()*stock_anterior;
                         
-                        float peso_actualizado = stock_producto_bodega.getPeso() * stock_producto_bodega.getStock();
+                        float peso_actualizado = stock_bodega.getPeso() * stock_bodega.getStock();
                         peso_total += peso_actualizado;
                         
-                        float volumen_actualizado = stock_producto_bodega.getVolumen() * stock_producto_bodega.getStock();
+                        float volumen_actualizado = stock_bodega.getVolumen() * stock_bodega.getStock();
                         volumen_total += volumen_actualizado;
                         
                         // Y actualizar los labels
                         updateBodegaLimitsLabels();
 
                         // Editar modelo
-                        ((DefaultTableModel) vista_stock.table_stock.getModel()).setValueAt(stock_producto_bodega.getStock(), row, 3);
+                        ((DefaultTableModel) vista_stock.table_stock.getModel()).setValueAt(stock_bodega.getStock(), row, 3);
                         ((DefaultTableModel) vista_stock.table_stock.getModel()).setValueAt(peso_actualizado, row, 4);
                         ((DefaultTableModel) vista_stock.table_stock.getModel()).setValueAt(volumen_actualizado, row, 5);
                         
@@ -240,30 +243,30 @@ public class ControladorStock {
             frame.textfield_stock.setText("");
         });
         
-        frame.label_nombre.setText("Nombre: " +stock_producto_bodega.getNombre());
-        frame.label_peso.setText("Peso: "+stock_producto_bodega.getPeso());
-        frame.label_volumen.setText("Volumen: "+stock_producto_bodega.getVolumen());
-        frame.textfield_stock.setText(Integer.toString(stock_producto_bodega.getStock()));
+        frame.label_nombre.setText("Nombre: " +stock_bodega.getNombre());
+        frame.label_peso.setText("Peso: "+stock_bodega.getPeso());
+        frame.label_volumen.setText("Volumen: "+stock_bodega.getVolumen());
+        frame.textfield_stock.setText(Integer.toString(stock_bodega.getStock()));
         
         frame.setTitle(title);
         frame.setLocation(400, 400);
         frame.setVisible(true);
     }
     
-    private void deleteStock(String title, ModeloStock stock_producto_bodega, int index) {       
+    private void deleteStock(String title, ModeloStock stock_bodega, int row) {       
         if (JOptionPane.showConfirmDialog(null, "¿Esta seguro de eliminar este stock de la bodega?", title, 0) == 0) {
 
-            if (dao_stock.delete(stock_producto_bodega, bodega.getId())) {
+            if (dao_stock.delete(stock_bodega, bodega.getId())) {
                 // Restar valores anteriores
-                peso_total -= stock_producto_bodega.getPeso()*stock_producto_bodega.getStock();
-                volumen_total -= stock_producto_bodega.getVolumen()*stock_producto_bodega.getStock();
+                peso_total -= stock_bodega.getPeso()*stock_bodega.getStock();
+                volumen_total -= stock_bodega.getVolumen()*stock_bodega.getStock();
                 
                 // Y actualizar los labels
                 updateBodegaLimitsLabels();
                 
-                lista_stocks.remove(index);
+                lista_stocks.remove(row);
 
-                ((DefaultTableModel) vista_stock.table_stock.getModel()).removeRow(index);
+                ((DefaultTableModel) vista_stock.table_stock.getModel()).removeRow(row);
 
                 JOptionPane.showMessageDialog(null, "Stock eliminado");
             }

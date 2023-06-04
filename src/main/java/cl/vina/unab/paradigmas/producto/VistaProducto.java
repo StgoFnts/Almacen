@@ -1,6 +1,6 @@
 package cl.vina.unab.paradigmas.producto;
 
-import cl.vina.unab.paradigmas.main.utilidades.DisabledColorTableCellRenderer;
+import cl.vina.unab.paradigmas.utilidades.DisabledColorTableCellRenderer;
 
 public class VistaProducto extends javax.swing.JFrame {
 
@@ -22,6 +22,7 @@ public class VistaProducto extends javax.swing.JFrame {
         table_productos = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Interfaz Productos");
         setResizable(false);
 
         button_deshabilitar.setText("Deshabilitar");
@@ -37,7 +38,7 @@ public class VistaProducto extends javax.swing.JFrame {
 
             },
             new String [] {
-                "IDREAL", "ID", "NOMBRE", "PRECIO (clp)", "PESO [gr]", "VOLUMEN [cm3]"
+                "IDREAL", "ID", "NOMBRE", "PRECIO", "PESO", "VOLUMEN"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -48,6 +49,7 @@ public class VistaProducto extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        table_productos.setSelectionForeground(new java.awt.Color(0, 153, 204));
         table_productos.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(table_productos);
         if (table_productos.getColumnModel().getColumnCount() > 0) {
@@ -63,13 +65,13 @@ public class VistaProducto extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(20, 20, 20)
+                .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(button_crear, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(button_editar)
                     .addComponent(button_deshabilitar)
                     .addComponent(button_volver, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
+                .addGap(26, 26, 26)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 558, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(20, Short.MAX_VALUE))
         );
@@ -78,8 +80,12 @@ public class VistaProducto extends javax.swing.JFrame {
 
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(53, 53, 53)
+                .addGap(26, 26, 26)
                 .addComponent(button_crear, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(20, 20, 20)
                 .addComponent(button_editar, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -87,11 +93,7 @@ public class VistaProducto extends javax.swing.JFrame {
                 .addComponent(button_deshabilitar, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(20, 20, 20)
                 .addComponent(button_volver, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(53, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(20, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {button_crear, button_deshabilitar, button_editar, button_volver});

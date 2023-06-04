@@ -3,28 +3,28 @@ package cl.vina.unab.paradigmas.caja;
 import static java.lang.Math.abs;
 
 public class ModeloCaja {
-    private int id, numero, idVendedor;
+    private int id_caja, numero, id_vendedor;
     private String tipo;
 
-    public ModeloCaja(String tipo, int numero, int idVendedor) {
+    public ModeloCaja(String tipo, int numero, int id_vendedor) {
         this.tipo = tipo;
         this.numero = numero;
-        this.idVendedor = idVendedor;
+        this.id_vendedor = id_vendedor;
     }
     
-    public ModeloCaja(int id, String tipo, int numero, int idVendedor) {
-        this.id = id;
+    public ModeloCaja(int id_caja, String tipo, int numero, int id_vendedor) {
+        this.id_caja = id_caja;
         this.tipo = tipo;
         this.numero = numero;
-        this.idVendedor = idVendedor;
+        this.id_vendedor = id_vendedor;
     }
 
-    public int getId() {
-        return id;
+    public int getIdCaja() {
+        return id_caja;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setIdCaja(int id_caja) {
+        this.id_caja = id_caja;
     }
 
     public int getNumero() {
@@ -44,16 +44,16 @@ public class ModeloCaja {
     }
 
     public int getIdVendedor() {
-        return idVendedor;
+        return id_vendedor;
     }
 
-    public void setIdVendedor(int idVendedor) {
-        this.idVendedor = idVendedor;
+    public void setIdVendedor(int id_vendedor) {
+        this.id_vendedor = id_vendedor;
     }
     
     //Sobreescribir funcion toString, de forma que al llamar al objeto en combobox, envie el nombre
     @Override
     public String toString() {
-        return "ID: "+abs(this.id)+" - Tipo: "+this.tipo+" - Numero: "+this.numero;
+        return "ID: "+abs(this.id_caja)+" - Tipo: "+this.tipo+" - Numero: "+this.numero;
     }
 }

@@ -30,10 +30,6 @@ public class ModeloStock {
         return idProducto;
     }
 
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
-    }
-
     public int getStock() {
         return stock;
     }

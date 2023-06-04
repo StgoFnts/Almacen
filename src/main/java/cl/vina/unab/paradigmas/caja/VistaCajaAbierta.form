@@ -195,9 +195,9 @@
     <Component class="javax.swing.JButton" name="button_vender">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Segoe UI" size="14" style="1"/>
+          <Font name="Segoe UI" size="18" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;p style=&apos;text-align: center;&apos;&gt;Comprar productos&lt;/p&gt;&lt;p style=&apos;text-align: center;&apos;&gt;del carrito&lt;/p&gt;&lt;/html&gt;"/>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;p style=&apos;text-align: center;&apos;&gt;Generar boleta"/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>

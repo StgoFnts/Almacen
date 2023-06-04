@@ -2,6 +2,7 @@ package cl.vina.unab.paradigmas.caja;
 
 import cl.vina.unab.paradigmas.stock.ModeloStock;
 
+// Modelo que hereda de stock pero incluye el precio y la bodega a la que pertece cada producto
 public class ModeloProductoVenta extends ModeloStock {
     
     private int idBodega;
@@ -17,20 +18,12 @@ public class ModeloProductoVenta extends ModeloStock {
         return idBodega;
     }
 
-    public void setIdBodega(int idBodega) {
-        this.idBodega = idBodega;
-    }
-
     public float getPrecio() {
         return precio;
-    }
-
-    public void setPrecio(float precio) {
-        this.precio = precio;
     }
     
     @Override
     public String toString() {
-        return "Nombre: "+this.getNombre()+" - $"+this.precio;
+        return "Bodega: "+this.idBodega+" - Nombre: "+this.getNombre()+" - $"+this.precio;
     }
 }

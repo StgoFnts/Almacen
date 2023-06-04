@@ -1,9 +1,9 @@
 package cl.vina.unab.paradigmas.almacen;
 
-import cl.vina.unab.paradigmas.main.utilidades.SelectFrame;
+import cl.vina.unab.paradigmas.utilidades.SelectFrame;
 import cl.vina.unab.paradigmas.bodega.ControladorBodega;
 import cl.vina.unab.paradigmas.caja.ControladorCaja;
-import cl.vina.unab.paradigmas.main.utilidades.SelectItem;
+import cl.vina.unab.paradigmas.utilidades.SelectItem;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,7 @@ public class ControladorAlmacen {
     // Preparar la vista
     public void initializationAlmacen() {
         if (dao_almacen.select(lista_almacenes)) {
+            // Meter la lista de almacenes dentro de la tabla de almacenes
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_almacen.table_almacen.getModel();
             
             for (int i = 0; i < lista_almacenes.size(); i++) {
@@ -51,7 +52,7 @@ public class ControladorAlmacen {
                 showSelectFrame("Editar almacen", 2);   //Ir a la ventana seleccionar
             });
             vista_almacen.button_deshabilitar.addActionListener((e) -> {
-                showSelectFrame("Control Almacen", 3);
+                showSelectFrame("Control almacen", 3);
             });
             vista_almacen.button_volver.addActionListener((e) -> {
                 vista_almacen.setVisible(false);
@@ -67,18 +68,21 @@ public class ControladorAlmacen {
     
     private void showSelectFrame(String title, int option) {
         SelectFrame frame = new SelectFrame();
-        
+        // Colocar en combobox el objeto de almacen y su fila en la tabla
         for (int i = 0; i < lista_almacenes.size(); i++) {
             if (lista_almacenes.get(i).getId() > 0 || option == 3) {
                 frame.combobox_select.addItem(new SelectItem(lista_almacenes.get(i), i));
             }
         }
+        // Si hay almacenes en el combobox
         if (frame.combobox_select.getItemCount() > 0) {
+            // Dar funcionalidad a boton seleccionar, dependiendo que boton predecedor lo llamo
             frame.button_seleccionar.addActionListener((e) -> {
                 frame.setVisible(false);
-
+                
+                // Obtener objeto almacen contenido en combobox
                 ModeloAlmacen almacen = (ModeloAlmacen) ((SelectItem) frame.combobox_select.getSelectedItem()).getObject();
-                int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();
+                int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow(); // Fila
 
                 switch (option) {
                     // Al seleccionar un almacen
@@ -92,7 +96,7 @@ public class ControladorAlmacen {
                         break;
                     // Al in/habilitar un almacen
                     case 3:
-                        disableBodega(almacen, title, row);
+                        disableAlmacen(frame, almacen, title, row);
                         break;
                 }
 
@@ -109,7 +113,8 @@ public class ControladorAlmacen {
         }
     }
     
-    private void showUpdateFrame(String title, ModeloAlmacen almacen, int index) {
+    // Mostrar vista para crear o editar almacen
+    private void showUpdateFrame(String title, ModeloAlmacen almacen, int row) {
         VistaUpdateAlmacen frame = new VistaUpdateAlmacen();
 
         frame.button_enviar.addActionListener((e) -> {
@@ -120,24 +125,26 @@ public class ControladorAlmacen {
                 JOptionPane.showMessageDialog(frame, "Error: Casilla(s) vacia(s)");
             }
             else {
+                // Si almacen es nulo, es porque se esta creando uno nuevo
                 if (almacen == null) {
-                    insertAlmacen(nombre, direccion);
+                    insertAlmacen(frame, nombre, direccion);
 
                     frame.textfield_nombre.setText("");
                     frame.textfield_direccion.setText("");
                 }
                 else {
+                    // Settear valores en caso de que hayan sido editados
                     almacen.setNombre(nombre);
                     almacen.setDireccion(direccion);
-
-                    editAlmacen(almacen, index);
+                    
+                    editAlmacen(frame, almacen, row);
 
                     frame.setVisible(false);
                 }
             }
         });
         
-        //Si la id es mayor a 0, colocar datos de almacen coincidente de la lista
+        //Si la id es mayor a 0, colocar datos de almacen coincidente de la lista en los textfields
         if (almacen != null) {
             frame.textfield_nombre.setText(almacen.getNombre());
             frame.textfield_direccion.setText(almacen.getDireccion());
@@ -148,6 +155,8 @@ public class ControladorAlmacen {
         frame.setVisible(true);
     }
     
+    // Mostrar ventana de opciones una vez que se haya seleccionado un almacen
+    // Pudiendo ir al resto de interfaces como bodegas, cajas o volver
     private void showOptionsFrame(ModeloAlmacen almacen) {
         VistaOptionsAlmacen frame = new VistaOptionsAlmacen();
         
@@ -158,7 +167,7 @@ public class ControladorAlmacen {
                 almacen, 
                 dao_almacen.getDatabaseUser(), 
                 dao_almacen.getDatabasePassword()
-            ).initializationAlmacen();
+            ).initializationBodega();
         });
 
         frame.button_cajas.addActionListener((e) -> {
@@ -187,13 +196,14 @@ public class ControladorAlmacen {
         frame.setVisible(true);
     }
     
-    private void insertAlmacen(String nombre, String direccion) {
+   
+    private void insertAlmacen(JFrame frame, String nombre, String direccion) {
         ModeloAlmacen almacen = new ModeloAlmacen(nombre, direccion);
-
+        // Insertar almacen en la base de datos
         if (dao_almacen.insert(almacen)) {
-
+            // Agregar almacen a la lista
             lista_almacenes.add(almacen);
-            
+            // Agregar almacen a la tabla
             ((DefaultTableModel) vista_almacen.table_almacen.getModel()).addRow(new Object[] {
                 almacen.getId(),
                 abs(almacen.getId()),
@@ -201,29 +211,30 @@ public class ControladorAlmacen {
                 almacen.getDireccion()
             });
 
-            JOptionPane.showMessageDialog(null, "Almacen agregado");
+            JOptionPane.showMessageDialog(frame, "Almacen agregado");
         }
         else {
-            JOptionPane.showMessageDialog(null, "Error: Almacen no se pudo agregar");
+            JOptionPane.showMessageDialog(frame, "Error: Almacen no se pudo agregar");
         }
     }
     
-    private void editAlmacen(ModeloAlmacen almacen, int index) {
+    private void editAlmacen(JFrame frame, ModeloAlmacen almacen, int row) {
+        // Editar almacen
         if (dao_almacen.update(almacen)) {
             // Obtener el modelo default de la tabla
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_almacen.table_almacen.getModel();
-            // Editar modelo
-            modelo_tabla.setValueAt(almacen.getNombre(), index, 2);
-            modelo_tabla.setValueAt(almacen.getDireccion(), index, 3);
+            // Editar tabla
+            modelo_tabla.setValueAt(almacen.getNombre(), row, 2);
+            modelo_tabla.setValueAt(almacen.getDireccion(), row, 3);
 
-            JOptionPane.showMessageDialog(null, "Almacen editado"); 
+            JOptionPane.showMessageDialog(frame, "Almacen editado"); 
         }
         else {
-            JOptionPane.showMessageDialog(null, "Error: Almacen no pudo ser editado");
+            JOptionPane.showMessageDialog(frame, "Error: Almacen no pudo ser editado");
         }
     }
     
-    private void disableBodega(ModeloAlmacen almacen, String title, int index) {
+    private void disableAlmacen(JFrame frame, ModeloAlmacen almacen, String title, int row) {
         String message;
         
         if (almacen.getId() < 0) {
@@ -233,17 +244,17 @@ public class ControladorAlmacen {
             message = "deshabilita";
         }
         
-        if (JOptionPane.showConfirmDialog(null, "¿Esta seguro de "+message+"r este producto?", title, 0) == 0) {
+        if (JOptionPane.showConfirmDialog(frame, "¿Esta seguro de "+message+"r este producto?", title, 0) == 0) {
 
             if (dao_almacen.disable(almacen)) {
                 almacen.setId(almacen.getId()*-1);
 
-                ((DefaultTableModel) vista_almacen.table_almacen.getModel()).setValueAt(almacen.getId(), index, 0);
+                ((DefaultTableModel) vista_almacen.table_almacen.getModel()).setValueAt(almacen.getId(), row, 0);
 
-                JOptionPane.showMessageDialog(null, "Producto "+message+"do");
+                JOptionPane.showMessageDialog(frame, "Producto "+message+"do");
             }
             else {
-                JOptionPane.showMessageDialog(null, "Error: Producto no pudo ser "+message+"do");
+                JOptionPane.showMessageDialog(frame, "Error: Producto no pudo ser "+message+"do");
             }
         }
     }

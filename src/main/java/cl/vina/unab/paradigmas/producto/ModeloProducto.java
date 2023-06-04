@@ -74,5 +74,4 @@ public class ModeloProducto {
     public void setVolumen(float volumen) {
         this.volumen = volumen;
     }
-    
 }

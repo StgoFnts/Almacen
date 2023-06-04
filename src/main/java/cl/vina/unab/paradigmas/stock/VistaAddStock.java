@@ -1,6 +1,6 @@
 package cl.vina.unab.paradigmas.stock;
 
-import cl.vina.unab.paradigmas.main.utilidades.DisabledColorTableCellRenderer;
+import cl.vina.unab.paradigmas.utilidades.DisabledColorTableCellRenderer;
 
 public class VistaAddStock extends javax.swing.JFrame {
 
@@ -35,7 +35,7 @@ public class VistaAddStock extends javax.swing.JFrame {
 
             },
             new String [] {
-                "IDREAL", "id", "nombre", "peso", "volumen"
+                "IDREAL", "ID", "NOMBRE", "PESO", "VOLUMEN"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -46,6 +46,8 @@ public class VistaAddStock extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        table_productos.setSelectionForeground(new java.awt.Color(0, 153, 204));
+        table_productos.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(table_productos);
         if (table_productos.getColumnModel().getColumnCount() > 0) {
             table_productos.getColumnModel().getColumn(0).setResizable(false);

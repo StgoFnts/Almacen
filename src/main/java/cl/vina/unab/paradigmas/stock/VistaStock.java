@@ -1,6 +1,6 @@
 package cl.vina.unab.paradigmas.stock;
 
-import cl.vina.unab.paradigmas.main.utilidades.DisabledColorTableCellRenderer;
+import cl.vina.unab.paradigmas.utilidades.DisabledColorTableCellRenderer;
 
 public class VistaStock extends javax.swing.JFrame {
 
@@ -39,7 +39,7 @@ public class VistaStock extends javax.swing.JFrame {
 
             },
             new String [] {
-                "IDREAL", "id", "nombre", "stock", "peso", "volumen"
+                "IDREAL", "ID", "NOMBRE", "STOCK", "PESO", "VOLUMEN"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -50,11 +50,15 @@ public class VistaStock extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        table_stock.setSelectionForeground(new java.awt.Color(0, 153, 204));
+        table_stock.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(table_stock);
         if (table_stock.getColumnModel().getColumnCount() > 0) {
             table_stock.getColumnModel().getColumn(0).setResizable(false);
             table_stock.getColumnModel().getColumn(1).setResizable(false);
             table_stock.getColumnModel().getColumn(3).setResizable(false);
+            table_stock.getColumnModel().getColumn(4).setResizable(false);
+            table_stock.getColumnModel().getColumn(5).setResizable(false);
         }
 
         label_volumen.setFont(new java.awt.Font("Courier New", 1, 12)); // NOI18N

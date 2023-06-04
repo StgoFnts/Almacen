@@ -1,9 +1,10 @@
 package cl.vina.unab.paradigmas.main;
 
-import cl.vina.unab.paradigmas.main.utilidades.VistaLogin;
+import cl.vina.unab.paradigmas.utilidades.VistaLogin;
 import cl.vina.unab.paradigmas.almacen.ControladorAlmacen;
 import cl.vina.unab.paradigmas.producto.ControladorProducto;
 import cl.vina.unab.paradigmas.vendedor.ControladorVendedor;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,12 +17,12 @@ public class ControladorMain {
     private VistaMain vista_main;
     
     public ControladorMain() {
-        vista_main = new VistaMain();
-        openConfigFile();       
+        vista_main = new VistaMain();           
     }
     
+    // Inicializar los action listeners de cada boton, los cuales dan acceso
+    // a las distintas interfaces
     public void initializationMain() {
-                
         vista_main.button_almacenes.addActionListener((e) -> {
             vista_main.setVisible(false);
             new ControladorAlmacen(
@@ -52,18 +53,18 @@ public class ControladorMain {
         vista_main.setVisible(true);
     }
     
-    // Funciones que se llaman entre si mismas, (siendo como un ciclo) hasta que
-    // sea posible ingresar a la base de datos
     private void createConfigFile() {
         VistaLogin vista_login = new VistaLogin();
         // Agregar action listener
         vista_login.button_enviar.addActionListener((e) -> {
-            try (FileWriter credenciales = new FileWriter("app.cfg")) {
+            vista_login.setVisible(false);
+            // Intentar crear archivo .cfg con las credenciales ingresadas en la ventana login
+            try {
+                FileWriter credenciales = new FileWriter("app.cfg");
                 credenciales.write("user=" + vista_login.textfield_usuario.getText());
                 credenciales.write("\npass=" + vista_login.textfield_contrasena.getText());
-                
-                vista_login.setVisible(false);
-                // Reintentar
+                credenciales.close();
+                // Reintentar probar conexion con las credenciales ingresadas
                 openConfigFile();
             }
             catch (IOException ex) {
@@ -74,20 +75,25 @@ public class ControladorMain {
     }
     
     private void openConfigFile() {
+        // Intentar abrir archivo .cfg
         try (FileInputStream credenciales = new FileInputStream("app.cfg")) {
             Properties propiedades = new Properties();
             propiedades.load(credenciales);
             
+            // Crear objeto con las propiedades encontradas en archivo
             dao_main = new DaoMain(propiedades.getProperty("user"),propiedades.getProperty("pass"));
 
-            // Probar conexion, si es true, es porque hubo un fallo
-            if (!dao_main.testConnection()) {
-                JOptionPane.showMessageDialog(null, "Usuario o contraseña mal ingresada(s)");
+            // Probar conexion, si es false, es porque hubo un fallo
+            if (dao_main.testConnection()) {
+                this.initializationMain();
+            }
+            else {
+//                JOptionPane.showMessageDialog(null, "Usuario o contraseña mal ingresada(s)");
                 // Llevar a login vista
                 createConfigFile();
             }
-
         }
+        // Si archivo no existe, crearlo
         catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Ingrese credenciales de base de datos");
             createConfigFile();
@@ -95,7 +101,9 @@ public class ControladorMain {
     }
     
     public static void main(String[] args) {
-        new ControladorMain().initializationMain();       
+        FlatLightLaf.setup();
+        ControladorMain controlador_main = new ControladorMain();
+        controlador_main.openConfigFile();
     }
     
 }

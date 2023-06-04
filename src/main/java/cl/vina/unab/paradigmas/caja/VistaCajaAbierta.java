@@ -77,8 +77,8 @@ public class VistaCajaAbierta extends javax.swing.JPanel {
         button_eliminar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         button_eliminar.setText("<html><p style='text-align: center;'>Eliminar del</p><p style='text-align: center;'>carrito</p></html>");
 
-        button_vender.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        button_vender.setText("<html><p style='text-align: center;'>Comprar productos</p><p style='text-align: center;'>del carrito</p></html>");
+        button_vender.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        button_vender.setText("<html><p style='text-align: center;'>Generar boleta");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setText("<html><p style='text-align: center;'>Selecciona e ingresa la cantidad de productos deseados al carrito</p></html>");

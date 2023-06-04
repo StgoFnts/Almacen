@@ -1,8 +1,12 @@
 package cl.vina.unab.paradigmas.boleta;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ModeloBoleta {
     private int idBoleta, idCaja;
     private String fecha;
+    private List<ModeloDetalleBoleta> lista_detalle_boleta; // Guardar detalles de boleta asociados a la id de esta boleta
 
     public ModeloBoleta(String fecha, int idCaja) {
         this.fecha = fecha;
@@ -13,6 +17,7 @@ public class ModeloBoleta {
         this.idBoleta = idBoleta;
         this.fecha = fecha;
         this.idCaja = idCaja;
+        this.lista_detalle_boleta = new ArrayList<>();
     }
 
     public int getIdBoleta() {
@@ -27,15 +32,11 @@ public class ModeloBoleta {
         return idCaja;
     }
 
-    public void setIdCaja(int idCaja) {
-        this.idCaja = idCaja;
-    }
-
     public String getFecha() {
         return fecha;
     }
 
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
+    public List<ModeloDetalleBoleta> getListaDetalleBoleta() {
+        return lista_detalle_boleta;
     }
 }

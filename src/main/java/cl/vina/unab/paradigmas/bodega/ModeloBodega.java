@@ -29,7 +29,7 @@ public class ModeloBodega {
     //Sobreescribir funcion toString, de forma que al llamar al objeto en combobox, envie el id
     @Override
     public String toString() {
-        return "ID: "+abs(this.id)+" - Peso Max: "+(this.peso_max/1000)+"[KG] - Volumen Max: "+(this.volumen_max/1000000)+"[M3]";
+        return "ID: "+abs(this.id)+" - Peso Max: "+this.peso_max+" - Volumen Max: "+this.volumen_max;
     }
 
     public float getPesoMax() {

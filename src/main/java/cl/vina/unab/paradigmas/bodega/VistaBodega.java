@@ -1,6 +1,6 @@
 package cl.vina.unab.paradigmas.bodega;
 
-import cl.vina.unab.paradigmas.main.utilidades.DisabledColorTableCellRenderer;
+import cl.vina.unab.paradigmas.utilidades.DisabledColorTableCellRenderer;
 
 public class VistaBodega extends javax.swing.JFrame {
 
@@ -24,6 +24,7 @@ public class VistaBodega extends javax.swing.JFrame {
         label_bodega = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         button_deshabilitar.setText("Deshabilitar");
 
@@ -34,7 +35,7 @@ public class VistaBodega extends javax.swing.JFrame {
 
             },
             new String [] {
-                "IDREAL", "id", "peso limite", "volumen limite"
+                "IDREAL", "ID", "PESO LIMITE", "VOLUMEN LIMITE"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -45,6 +46,7 @@ public class VistaBodega extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        table_bodega.setSelectionForeground(new java.awt.Color(0, 153, 204));
         jScrollPane1.setViewportView(table_bodega);
         if (table_bodega.getColumnModel().getColumnCount() > 0) {
             table_bodega.getColumnModel().getColumn(0).setResizable(false);
@@ -61,6 +63,8 @@ public class VistaBodega extends javax.swing.JFrame {
         button_agregar.setText("Agregar");
 
         button_editar.setText("Editar");
+
+        label_bodega.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -86,7 +90,7 @@ public class VistaBodega extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(0, 0, 0)
                 .addComponent(label_bodega, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -101,7 +105,7 @@ public class VistaBodega extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(button_volver, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {button_agregar, button_deshabilitar, button_editar, button_seleccionar, button_volver});

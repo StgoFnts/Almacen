@@ -1,7 +1,7 @@
 package cl.vina.unab.paradigmas.producto;
 
-import cl.vina.unab.paradigmas.main.utilidades.SelectFrame;
-import cl.vina.unab.paradigmas.main.utilidades.SelectItem;
+import cl.vina.unab.paradigmas.utilidades.SelectFrame;
+import cl.vina.unab.paradigmas.utilidades.SelectItem;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class ControladorProducto {
     
     public void initializationProducto() {
         if (dao_producto.select(lista_productos)) {
-                       
+            // Obtener modelo de la tabla productos e insertar objetos de la lista
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_producto.table_productos.getModel();
             
             for (int i = 0; i < lista_productos.size(); i++) {
@@ -40,6 +40,7 @@ public class ControladorProducto {
                 });
             }
             
+            // Inicializar action listeners
             vista_producto.button_crear.addActionListener((e) -> {
                 showUpdateFrame("Crear producto", null, 0);  //Ir a la ventana agregar
             });
@@ -67,17 +68,21 @@ public class ControladorProducto {
     private void showSelectFrame(String title, boolean is_disabling) {
         SelectFrame frame = new SelectFrame();
         
+        // Introducir en combobox solo productos habilitados o todos, si es que es la ventana de deshabilitar
         for (int i = 0; i < lista_productos.size(); i++) {
             if (lista_productos.get(i).getId() > 0 || is_disabling) {
                 frame.combobox_select.addItem(new SelectItem(lista_productos.get(i), i));
             }
         }
+        
+        // Si hay elementos en combobox
         if (frame.combobox_select.getItemCount() > 0) {
+            // Action listener que dependiendo si se esta deshabilitando o editando, cambia comportamiento
             frame.button_seleccionar.addActionListener((e) -> {
                 frame.setVisible(false);
-
+                // Obtener producto de combobox
                 ModeloProducto producto = (ModeloProducto) ((SelectItem) frame.combobox_select.getSelectedItem()).getObject();
-                int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();
+                int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();  // Fila
 
                 if (is_disabling) {
                     disableProducto(title, producto, row);
@@ -85,7 +90,7 @@ public class ControladorProducto {
                 else {
                     showUpdateFrame("Editar producto", producto, row);
                 }
-
+                // Seleccionar producto de la tabla, para que se actualice celda
                 vista_producto.table_productos.setRowSelectionInterval(row, 0);
             });
 
@@ -108,20 +113,22 @@ public class ControladorProducto {
             String precio_string = frame.textfield_precio.getText();
             String peso_string = frame.textfield_peso.getText();
             String volumen_string = frame.textfield_volumen.getText();
-            
+            // Si alguna casilla esta vacia
             if (nombre.equals("") || precio_string.equals("") || peso_string.equals("") || volumen_string.equals("")) {
                 JOptionPane.showMessageDialog(null, "Error: Casilla(s) vacia(s)");
             }
             else {
                 try {
+                    // Intentar pasar variables a valores numericos
                     float precio = Float.parseFloat(precio_string);
                     float peso = Float.parseFloat(peso_string);
                     float volumen = Float.parseFloat(volumen_string);
-                    
+                    // Si alguna variable es menor a 0
                     if (precio < 0 || peso < 0 || volumen < 0) {
                         JOptionPane.showMessageDialog(frame, "Error: Ingresa valor(es) mayor a 0");
                     }
                     else {
+                        // Si es null, es producto nuevo
                         if (producto == null) {
                             insertProducto(nombre, precio, peso, volumen);
                             
@@ -166,11 +173,11 @@ public class ControladorProducto {
     
     private void insertProducto(String nombre, float precio, float peso, float volumen) {
         ModeloProducto producto = new ModeloProducto(nombre, precio, peso, volumen);
-
+        // Si fue posible insertar producto en BD
         if (dao_producto.insert(producto)) {
-
+            // Guardarlo en lista de productos
             lista_productos.add(producto);
-            
+            // E introducirlo en la tabla
             ((DefaultTableModel) vista_producto.table_productos.getModel()).addRow(new Object [] {
                 producto.getId(),
                 abs(producto.getId()),
@@ -188,10 +195,11 @@ public class ControladorProducto {
     }
     
     private void editProducto(ModeloProducto producto, int index) {
+        // Si se pudo editar producto
         if (dao_producto.update(producto)) {
+            
             // Obtener modelo de la tabla
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_producto.table_productos.getModel();
-            
             // Editar la tabla en el index especificado
             modelo_tabla.setValueAt(producto.getNombre(), index, 2);
             modelo_tabla.setValueAt(producto.getPrecio(), index, 3);

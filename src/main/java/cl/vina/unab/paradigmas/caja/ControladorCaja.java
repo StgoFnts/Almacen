@@ -1,11 +1,12 @@
 package cl.vina.unab.paradigmas.caja;
 
 import cl.vina.unab.paradigmas.almacen.ModeloAlmacen;
+import cl.vina.unab.paradigmas.boleta.ControladorBoleta;
 import cl.vina.unab.paradigmas.boleta.DaoBoleta;
 import cl.vina.unab.paradigmas.boleta.ModeloBoleta;
 import cl.vina.unab.paradigmas.boleta.ModeloDetalleBoleta;
-import cl.vina.unab.paradigmas.main.utilidades.SelectFrame;
-import cl.vina.unab.paradigmas.main.utilidades.SelectItem;
+import cl.vina.unab.paradigmas.utilidades.SelectFrame;
+import cl.vina.unab.paradigmas.utilidades.SelectItem;
 import cl.vina.unab.paradigmas.stock.DaoStock;
 import cl.vina.unab.paradigmas.stock.ModeloStock;
 import cl.vina.unab.paradigmas.vendedor.ModeloVendedor;
@@ -40,11 +41,11 @@ public class ControladorCaja {
     public void initializationCaja() {
         if (dao_caja.select(lista_cajas, lista_vendedores, lista_productos_venta, almacen.getId())) {
             // Rehabilitar cualquier caja, en caso de que alguna hubiese quedado abierta
-            // En alguna sesión anterior o que haya sido interrumpida
+            // en alguna sesión anterior o que haya sido interrumpida
             for (ModeloCaja caja : lista_cajas) {
-                if (caja.getId() < 0) {
+                if (caja.getIdCaja() < 0) {
                     if (dao_caja.disable(caja)) {
-                        caja.setId(caja.getId()*-1);
+                        caja.setIdCaja(caja.getIdCaja()*-1);
                     }
                 }
             }
@@ -73,12 +74,21 @@ public class ControladorCaja {
             });
             
             vista_caja.button_boletas.addActionListener((e) -> {
+                new ControladorBoleta(almacen, dao_caja.getDatabaseUser(), dao_caja.getDatabasePassword()).initializationCaja();
             });
             
             vista_caja.combobox_cajas.addActionListener((e) -> {
-                showPanel((VistaCajaAbierta) vista_caja.combobox_cajas.getSelectedItem());
+                // Mostrar panel del combobox seleccionado
+                VistaCajaAbierta panel = (VistaCajaAbierta) vista_caja.combobox_cajas.getSelectedItem();
+                // Si el panel no es vacio
+                if (panel != null) {
+                    showPanel(panel);
+                }
+                // Sino, mostrar un panel vacio
+                else {
+                    showPanel(new JPanel());
+                }
             });
-            
             vista_caja.setVisible(true);
         }
         else {
@@ -99,8 +109,8 @@ public class ControladorCaja {
         SelectFrame frame = new SelectFrame();
         
         for (ModeloCaja caja : lista_cajas) {
-            // En el caso de editar tambien, ya que no se deberia de poder editar una caja ya abierta
-            if (caja.getId() > 0) {
+            // En el caso de editar tambien, ya que no se deberia de poder editar una caja ya abierta o de vendedores deshabilitados
+            if (caja.getIdCaja() > 0 && caja.getIdVendedor() > 0) {
                 frame.combobox_select.addItem(caja);
             }
         }
@@ -133,9 +143,12 @@ public class ControladorCaja {
         VistaUpdateCaja panel = new VistaUpdateCaja();
         
         for (ModeloVendedor vendedor : lista_vendedores) {
-            panel.combobox_vendedores.addItem(vendedor);
+            if (vendedor.getId() > 0) {     // Solamente mostrar vendedores habilitados
+                panel.combobox_vendedores.addItem(vendedor);
+            }
+            
         }
-        
+        // Si la cantidad de vendedores disponibles es igual a 0, no mostrar panel
         if (panel.combobox_vendedores.getItemCount() == 0) {
             JOptionPane.showMessageDialog(panel, "Error: No hay vendedores disponibles");
         }
@@ -188,6 +201,7 @@ public class ControladorCaja {
                         JOptionPane.showMessageDialog(panel, "Error: Casilla 'numero' solamente acepta valores numericos...");
                     }
                 }
+                showPanel(new JPanel());
             });
 
             if (caja != null) {
@@ -201,7 +215,7 @@ public class ControladorCaja {
 
     private void showCajaAbiertaPanel(ModeloCaja caja) {
         if (dao_caja.disable(caja)) {
-            VistaCajaAbierta panel = new VistaCajaAbierta(caja.getId());
+            VistaCajaAbierta panel = new VistaCajaAbierta(caja.getIdCaja());
                
             for (int i = 0; i < lista_productos_venta.size(); i++) {
                 panel.combobox_productos.addItem(lista_productos_venta.get(i));
@@ -209,7 +223,7 @@ public class ControladorCaja {
             
             if (panel.combobox_productos.getItemCount() != 0) {
                 // Deshabilitarlo temporalmente (deshabilitado mientras esta siendo ocupado / esta abierto)
-                caja.setId(caja.getId()*-1);
+                caja.setIdCaja(caja.getIdCaja()*-1);
                 
                 panel.button_agregar.addActionListener((e) -> {
                     addToCarrito(panel);
@@ -227,6 +241,15 @@ public class ControladorCaja {
                     payCarrito(panel, caja);
                 });
                
+                panel.button_cerrar.addActionListener((e) -> {
+                    if (panel.table_carrito.getRowCount() > 0) {
+                        if (JOptionPane.showConfirmDialog(null, "¿Estas seguro? Continuar cancelera los productos en el carrito de compras", "Confirmar cerrar caja", 0) != 0) {
+                            return;
+                        }
+                    }
+                    caja.setIdCaja(caja.getIdCaja()*-1);
+                    vista_caja.combobox_cajas.removeItem(panel);
+                });
                 
                 // Agregar caja al combobox
                 vista_caja.combobox_cajas.addItem(panel);
@@ -238,30 +261,35 @@ public class ControladorCaja {
             }
         }
         else {
-            JOptionPane.showMessageDialog(null, "Error: No se pudo abrir la Caja N°" + caja.getId());
+            JOptionPane.showMessageDialog(null, "Error: No se pudo abrir la Caja N°" + caja.getIdCaja());
         }
     }
     
     private void addToCarrito(VistaCajaAbierta panel) {
+        // Si no hay productos en el combobox
         if (panel.combobox_productos.getItemCount() == 0) {      
             JOptionPane.showMessageDialog(null, "Error: Ya no quedan productos para agregar");
         }
+        // O el textfield cantidad esta vacio
         else if (panel.textfield_cantidad.getText().equals("")) {
             JOptionPane.showMessageDialog(null, "Error: Casilla cantidad vacia");
         }
         else {
-            ModeloProductoVenta producto = (ModeloProductoVenta) panel.combobox_productos.getSelectedItem();
+            //Sino, obtener producto de combobox
+            ModeloProductoVenta producto_venta = (ModeloProductoVenta) panel.combobox_productos.getSelectedItem();
             try {
-                if (producto.getStock() < Integer.parseInt(panel.textfield_cantidad.getText())) {
-                    JOptionPane.showMessageDialog(null, "Error: Cantidad insuficiente en stock de esta bodega. Intente con un valor menor o igual a "+producto.getStock());
+                // Si el valor ingresado es mayor al que hay disponible en esa bodega
+                if (producto_venta.getStock() < Integer.parseInt(panel.textfield_cantidad.getText())) {
+                    JOptionPane.showMessageDialog(null, "Error: Cantidad insuficiente en stock de esta bodega. Intente con un valor menor o igual a "+producto_venta.getStock());
                 }
                 else {
+                    // Agregar producto al carrito
                     ((DefaultTableModel) panel.table_carrito.getModel()).addRow(new Object[] {
-                        producto.getIdBodega(),
-                        producto.getIdProducto(),
-                        producto.getNombre(),
+                        producto_venta.getIdBodega(),
+                        producto_venta.getIdProducto(),
+                        producto_venta.getNombre(),
                         panel.textfield_cantidad.getText(),
-                        producto.getPrecio() * Integer.parseInt(panel.textfield_cantidad.getText())
+                        producto_venta.getPrecio() * Integer.parseInt(panel.textfield_cantidad.getText())
                     });
 
                     // Eliminarlo de combobox, ya que ya esta en la lista
@@ -317,60 +345,68 @@ public class ControladorCaja {
     }
     
     private void payCarrito(VistaCajaAbierta panel, ModeloCaja caja) {
-        if (JOptionPane.showConfirmDialog(null, "¿Desea generar su boleta?", "Confirmación venta", 0) == 0) {
+        if (panel.table_carrito.getRowCount() != 0) {
             
-            DaoBoleta dao_boleta = new DaoBoleta(dao_caja.getDatabaseUser(), dao_caja.getDatabasePassword());
-            
-            String fecha = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-            
-            ModeloBoleta boleta = new ModeloBoleta(fecha, caja.getId());
-            
-            float total_venta = 0;
-            
-            if (dao_boleta.insertBoleta(boleta)) {
-                // Por cada fila de la tabla carrito en un ciclo inverso
-                for (int i = panel.table_carrito.getRowCount() - 1; i > -1; i--) {
-                    // Obtener id's de la tabla, solamente haciendo más legible el condicional
-                    int table_id_bodega = Integer.parseInt(panel.table_carrito.getValueAt(i, 0).toString());
-                    int table_id_producto = Integer.parseInt(panel.table_carrito.getValueAt(i, 1).toString());
-                    int cantidad = Integer.parseInt(panel.table_carrito.getValueAt(i, 3).toString());
-                    float precio_venta = Float.parseFloat(panel.table_carrito.getValueAt(i, 4).toString());
-                    
-                    // Por cada producto en la lista de productos venta
-                    for (ModeloProductoVenta producto : lista_productos_venta) {
-                        
+            if (JOptionPane.showConfirmDialog(null, "¿Desea generar su boleta?", "Confirmación venta", 0) == 0) {
+                // Llamar al dao de boleta
+                DaoBoleta dao_boleta = new DaoBoleta(dao_caja.getDatabaseUser(), dao_caja.getDatabasePassword());
 
-                        // Si id's de la tabla coinciden con lo de la lista de productos disponibles, quitarlo de la boleta y crear detalle de la boleta
-                        if (producto.getIdBodega() == table_id_bodega && producto.getIdProducto() == table_id_producto) {
-                            // Obtener cantidad
-                            
-                            total_venta += precio_venta;
-                            
-                            DaoStock dao_stock = new DaoStock(dao_caja.getDatabaseUser(), dao_caja.getDatabasePassword());
-                            ModeloStock stock_bodega = new ModeloStock(producto.getIdProducto(), producto.getStock() - cantidad);
-                            // Si el valor en bodega queda en 0, borrar producto de esa bodega, ya que su registro quedara en la boleta de todas formas.
-                            if (stock_bodega.getStock() == 0) {
-                                dao_stock.delete(stock_bodega, producto.getIdBodega());
+                // Obtener fecha de cuando se crea esta boleta
+                String fecha = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+                // Crear objeto boleta
+                ModeloBoleta boleta = new ModeloBoleta(fecha, caja.getIdCaja());
+
+                // Si es que fue posible insertar boleta
+                if (dao_boleta.insertBoleta(boleta)) {
+                    // Por cada fila de la tabla carrito, en un ciclo inverso
+                    for (int i = panel.table_carrito.getRowCount() - 1; i > -1; i--) {
+                        // Obtener id's de la tabla, solamente haciendo más legible el condicional
+                        int table_id_bodega = Integer.parseInt(panel.table_carrito.getValueAt(i, 0).toString());
+                        int table_id_producto = Integer.parseInt(panel.table_carrito.getValueAt(i, 1).toString());
+                        int cantidad = Integer.parseInt(panel.table_carrito.getValueAt(i, 3).toString());
+                        float precio_venta = Float.parseFloat(panel.table_carrito.getValueAt(i, 4).toString());
+
+                        // Por cada producto en la lista de productos venta
+                        for (ModeloProductoVenta producto_venta : lista_productos_venta) {
+                            // Si id's de la tabla coinciden con lo de la lista de productos disponibles, quitarlo de la boleta y crear detalle de la boleta
+                            if (producto_venta.getIdBodega() == table_id_bodega && producto_venta.getIdProducto() == table_id_producto) {                    
+                                DaoStock dao_stock = new DaoStock(dao_caja.getDatabaseUser(), dao_caja.getDatabasePassword());
+
+                                // Actualizar valor del stock del producto
+                                producto_venta.setStock(producto_venta.getStock() - cantidad);
+
+                                // Crear un ModeloStock para actualizar bodega
+                                ModeloStock stock_bodega = new ModeloStock(producto_venta.getIdProducto(), producto_venta.getStock());
+
+                                // Si el valor en bodega queda en 0, borrar producto de esa bodega, ya que su registro quedara en la boleta de todas formas.
+                                if (stock_bodega.getStock() == 0) {
+                                    dao_stock.delete(stock_bodega, producto_venta.getIdBodega());
+                                }
+                                else {
+                                    dao_stock.update(stock_bodega, producto_venta.getIdBodega());
+                                    panel.combobox_productos.addItem(producto_venta);
+                                }
+
+                                // Crear detalle de la boleta, por cada producto
+                                ModeloDetalleBoleta detalle_boleta = new ModeloDetalleBoleta(boleta.getIdBoleta(), producto_venta.getIdProducto(), cantidad, precio_venta);
+                                // Y guardarlo en la base de datos
+                                dao_boleta.insertDetalleBoleta(detalle_boleta);
+                                // Eliminar de la tabla
+                                ((DefaultTableModel) panel.table_carrito.getModel()).removeRow(i);
                             }
-                            else {
-                                dao_stock.update(stock_bodega, producto.getIdBodega());
-                            }
-                            
-                            // Crear detalle de la boleta, por cada producto
-                            ModeloDetalleBoleta detalle_boleta = new ModeloDetalleBoleta(boleta.getIdBoleta(), producto.getIdProducto(), cantidad, precio_venta);
-                            // Y guardarlo en la base de datos
-                            dao_boleta.insertDetalleBoleta(detalle_boleta);
-                            // Eliminar de la tabla
-                            ((DefaultTableModel) panel.table_carrito.getModel()).removeRow(i);
                         }
                     }
+                    // Mostrar ventana de boletas, iniciando desde la última boleta agregada
+                    new ControladorBoleta(almacen, dao_caja.getDatabaseUser(), dao_caja.getDatabasePassword()).initializationCaja();
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Error: No fue posible crear la boleta");
                 }
             }
-            else {
-                JOptionPane.showMessageDialog(null, "Error: No fue posible crear la boleta");
-            }
-            
-            System.out.println(total_venta);
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Error: No hay productos en el carrito");
         }
     }
 }

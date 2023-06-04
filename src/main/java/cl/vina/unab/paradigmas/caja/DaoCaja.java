@@ -54,7 +54,7 @@ public class DaoCaja extends DaoMain {
                 "ON idBodega = bodegas_idBodega " +
                 "INNER JOIN productos " +
                 "ON idProducto = productos_idProducto " +
-                "WHERE idAlmacen = ? AND idProducto > 0;"
+                "WHERE idAlmacen = ? AND idProducto > 0  AND idBodega > 0"  //Almacen seleccionado y donde producto y bodega este habilitada
             );
             statement.setInt(1, idAlmacen);
             
@@ -96,7 +96,7 @@ public class DaoCaja extends DaoMain {
             ResultSet result = connection.prepareStatement("SELECT LAST_INSERT_ID() FROM cajas").executeQuery();
             
             if (result.next()) {
-                caja.setId(result.getInt(1));
+                caja.setIdCaja(result.getInt(1));
                 return true;
             }
             
@@ -119,7 +119,7 @@ public class DaoCaja extends DaoMain {
             statement.setString(1, caja.getTipo());
             statement.setInt(2, caja.getNumero());
             statement.setInt(3, caja.getIdVendedor());
-            statement.setFloat(4, caja.getId());
+            statement.setFloat(4, caja.getIdCaja());
             statement.executeUpdate();
            
             return true;
@@ -138,8 +138,8 @@ public class DaoCaja extends DaoMain {
             
             PreparedStatement statement = connection.prepareStatement("UPDATE cajas SET idCaja = ? WHERE idCaja = ?");
             
-            statement.setInt(1, caja.getId() * -1);
-            statement.setInt(2,caja.getId());
+            statement.setInt(1, caja.getIdCaja() * -1);
+            statement.setInt(2,caja.getIdCaja());
             statement.executeUpdate();
             
             return true;

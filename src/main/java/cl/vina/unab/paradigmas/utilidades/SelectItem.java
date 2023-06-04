@@ -1,4 +1,4 @@
-package cl.vina.unab.paradigmas.main.utilidades;
+package cl.vina.unab.paradigmas.utilidades;
 
 public class SelectItem {
     private Object object;
@@ -11,7 +11,7 @@ public class SelectItem {
     
     @Override
     public String toString() {
-        return this.object.toString()+" - fila: "+this.row;
+        return "fila: "+(this.row+1)+" - "+this.object.toString();
     }
     
     public Object getObject() {

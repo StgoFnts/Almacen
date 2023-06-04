@@ -1,6 +1,6 @@
 package cl.vina.unab.paradigmas.vendedor;
 
-import cl.vina.unab.paradigmas.main.utilidades.DisabledColorTableCellRenderer;
+import cl.vina.unab.paradigmas.utilidades.DisabledColorTableCellRenderer;
 
 public class VistaVendedor extends javax.swing.JFrame {
 
@@ -37,7 +37,7 @@ public class VistaVendedor extends javax.swing.JFrame {
 
             },
             new String [] {
-                "IDREAL", "id", "nombre", "run"
+                "IDREAL", "ID", "NOMBRE", "RUN"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -48,6 +48,7 @@ public class VistaVendedor extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        table_vendedor.setSelectionForeground(new java.awt.Color(0, 153, 204));
         table_vendedor.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(table_vendedor);
         if (table_vendedor.getColumnModel().getColumnCount() > 0) {

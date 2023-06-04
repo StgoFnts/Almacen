@@ -1,7 +1,7 @@
 package cl.vina.unab.paradigmas.vendedor;
 
-import cl.vina.unab.paradigmas.main.utilidades.SelectFrame;
-import cl.vina.unab.paradigmas.main.utilidades.SelectItem;
+import cl.vina.unab.paradigmas.utilidades.SelectFrame;
+import cl.vina.unab.paradigmas.utilidades.SelectItem;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +23,10 @@ public class ControladorVendedor {
     }
     
     public void initializationVendedor() {
+        // Seleccionar todos los vendedores
         if (dao_vendedor.select(lista_vendedores)) {
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_vendedor.table_vendedor.getModel();
-            
+            // Introducirlos en la tabla
             for (int i = 0; i < lista_vendedores.size(); i++) {
                 ModeloVendedor vendedor = lista_vendedores.get(i);
                 
@@ -36,17 +37,17 @@ public class ControladorVendedor {
                     vendedor.getRun()
                 });
             }
-            
+            // Inicializar action listeners de botones
             vista_vendedor.button_crear.addActionListener((e) -> {
                 showUpdateFrame("Contratar vendedor", null, 0);  //Ir a la ventana agregar
             });
             
             vista_vendedor.button_editar.addActionListener((e) -> {
-                showSelectFrame("Editar datos vendedor", 1);   //Ir a la ventana seleccionar
+                showSelectFrame("Editar datos vendedor", false);   //Ir a la ventana seleccionar
             });
 
             vista_vendedor.button_deshabilitar.addActionListener((e) -> {
-                showSelectFrame("Disponibilidad vendedor", 2);
+                showSelectFrame("Disponibilidad vendedor", true);
             });
             
             vista_vendedor.button_volver.addActionListener((e) -> {
@@ -61,31 +62,30 @@ public class ControladorVendedor {
         }
     }
     
-    private void showSelectFrame(String title, int option) {
+    private void showSelectFrame(String title, boolean is_disabling) {
         SelectFrame frame = new SelectFrame();
-               
-        
+        // Por cada vendedor en la lista vendedores
         for (int i = 0; i < lista_vendedores.size(); i++) {
-            if (lista_vendedores.get(i).getId() > 0 || option > 1) {
+            // Si esta disponible o si se esta editando disponibilidad
+            if (lista_vendedores.get(i).getId() > 0 || is_disabling) {
                 frame.combobox_select.addItem(new SelectItem(lista_vendedores.get(i), i));
             }
         }
+        // Si combobox es mayor a 0
         if (frame.combobox_select.getItemCount() > 0) {
             frame.button_seleccionar.addActionListener((e) -> {
                 frame.setVisible(false);
-
+                // Obtener vendedor de combobox
                 ModeloVendedor vendedor = (ModeloVendedor) ((SelectItem) frame.combobox_select.getSelectedItem()).getObject();
                 int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();
-
-                switch (option) {
-                    case 1:
-                        showUpdateFrame("Editar vendedor", vendedor, row);
-                        break;
-                    case 2:
-                        disableProducto(title, vendedor, row);
-                        break;
+                // Des/Habilitar
+                if (is_disabling) {
+                    disableProducto(title, vendedor, row);
                 }
-
+                // Editar
+                else {
+                    showUpdateFrame("Editar vendedor", vendedor, row);
+                }
                 vista_vendedor.table_vendedor.setRowSelectionInterval(row, 0);
             });
 
@@ -116,6 +116,7 @@ public class ControladorVendedor {
                     JOptionPane.showMessageDialog(frame, "Error: El RUN no puede superar 12 caracteres");
                 }
                 else {
+                    // Si vendedor es null, es vendedor nuevo
                     if (vendedor == null) {
                         insertVendedor(nombre, run);
 
@@ -149,11 +150,11 @@ public class ControladorVendedor {
     
     private void insertVendedor(String nombre, String run) {
         ModeloVendedor vendedor = new ModeloVendedor(nombre, run);
-
+        // Si se logro insertar
         if (dao_vendedor.insert(vendedor)) {
-
+            // Agregar a lista
             lista_vendedores.add(vendedor);
-            
+            // Agregar a tabla
             ((DefaultTableModel) vista_vendedor.table_vendedor.getModel()).addRow(new Object [] {
                 vendedor.getId(),
                 abs(vendedor.getId()),
@@ -169,6 +170,7 @@ public class ControladorVendedor {
     }
     
     private void editProducto(ModeloVendedor vendedor, int row) {
+        // Si se logra editar
         if (dao_vendedor.update(vendedor)) {
             // Obtener modelo de la tabla
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_vendedor.table_vendedor.getModel();
@@ -197,7 +199,7 @@ public class ControladorVendedor {
         if (JOptionPane.showConfirmDialog(null, "¿Esta seguro de "+message+"r este vendedor?", title, 0) == 0) {
             if (dao_vendedor.disable(vendedor)) {
                 vendedor.setId(vendedor.getId()*-1);
-
+                // Editar en la tabla, en la columna no visible de IDREAL
                 ((DefaultTableModel) vista_vendedor.table_vendedor.getModel()).setValueAt(vendedor.getId(), row, 0);
 
                 JOptionPane.showMessageDialog(null, "Vendedor "+message+"do");

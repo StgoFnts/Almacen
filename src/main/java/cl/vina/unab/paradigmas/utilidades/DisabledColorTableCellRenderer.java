@@ -1,4 +1,4 @@
-package cl.vina.unab.paradigmas.main.utilidades;
+package cl.vina.unab.paradigmas.utilidades;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -6,6 +6,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+// Funcion utilizada para cambiar color de celdas de los componentes que sean deshabilitados
 public class DisabledColorTableCellRenderer implements TableCellRenderer {
     
     @Override

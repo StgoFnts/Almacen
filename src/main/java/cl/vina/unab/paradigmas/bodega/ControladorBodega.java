@@ -1,8 +1,8 @@
 package cl.vina.unab.paradigmas.bodega;
 
 import cl.vina.unab.paradigmas.almacen.ModeloAlmacen;
-import cl.vina.unab.paradigmas.main.utilidades.SelectFrame;
-import cl.vina.unab.paradigmas.main.utilidades.SelectItem;
+import cl.vina.unab.paradigmas.utilidades.SelectFrame;
+import cl.vina.unab.paradigmas.utilidades.SelectItem;
 import cl.vina.unab.paradigmas.stock.ControladorStock;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
@@ -27,14 +27,14 @@ public class ControladorBodega {
         this.almacen = almacenSeleccionado;
     }
     
-    //Prepara la vista, obteniendo 
-    public void initializationAlmacen() {
+    //Preparar la vista
+    public void initializationBodega() {
+        // Obtener lista de bodegas del almacen seleccionado
         if (dao_bodega.select(lista_bodegas, almacen.getId())) {
+            // Obtener modelo e introducir objetos en tabla
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_bodega.table_bodega.getModel();
             
-            for (int i = 0; i < lista_bodegas.size(); i++) {
-                ModeloBodega bodega = lista_bodegas.get(i);
-                
+            for (ModeloBodega bodega : lista_bodegas) {                
                 modelo_tabla.addRow(new Object[] {
                     bodega.getId(),
                     abs(bodega.getId()),
@@ -76,17 +76,21 @@ public class ControladorBodega {
     private void showSelectFrame(String title, int option) {
         SelectFrame frame = new SelectFrame();
         
+        // Introducir lista de bodegas en combobox
         for (int i = 0; i < lista_bodegas.size(); i++) {
+            // Si su id indica que esta habilitada o se selecciono la opcion 3 (que rehabilita)
             if (lista_bodegas.get(i).getId() > 0 || option == 3) {
                 frame.combobox_select.addItem(new SelectItem(lista_bodegas.get(i), i));
             }
         }
+        // Si hay objetos dentro del combobox
         if (frame.combobox_select.getItemCount() > 0) {
+            // Action listener que cambia según que boton llamo a la ventana de seleccionar
             frame.button_seleccionar.addActionListener((e) -> {
                 frame.setVisible(false);
-
+                // Obtener bodega del comobox
                 ModeloBodega bodega = (ModeloBodega) ((SelectItem) frame.combobox_select.getSelectedItem()).getObject();
-                int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();
+                int row = ((SelectItem) frame.combobox_select.getSelectedItem()).getRow();  // Fila
 
                 switch (option) {
                     // Al seleccionar una bodega
@@ -105,7 +109,7 @@ public class ControladorBodega {
                     case 2:
                         showUpdateFrame("Editar almacen", bodega, row);
                         break;
-                    // Al in/habilitar un almacen
+                    // Al des/habilitar un almacen
                     case 3:
                         disableBodega(bodega, title, row);
                         break;
@@ -124,9 +128,10 @@ public class ControladorBodega {
         }
     }
         
-    private void showUpdateFrame(String title, ModeloBodega bodega, int index) {
+    private void showUpdateFrame(String title, ModeloBodega bodega, int row) {
         VistaUpdateBodega frame = new VistaUpdateBodega();
-
+        
+        // Action listener que depende si se esta creando o editando bodega
         frame.button_enviar.addActionListener((e) -> {
             // Comprobar que los datos hayan sido ingresados correctamente
             String peso_max_string = frame.textfield_peso_max.getText();
@@ -144,6 +149,7 @@ public class ControladorBodega {
                         JOptionPane.showMessageDialog(frame, "Error: Ingresa valor(es) mayor a 0");
                     }
                     else {
+                        // Si es null, es bodega nueva
                         if (bodega == null) {
                             insertBodega(peso_max, volumen_max);
                             
@@ -151,11 +157,12 @@ public class ControladorBodega {
                             frame.textfield_peso_max.setText("");
                             frame.textfield_volumen_max.setText("");
                         }
+                        // Si no, settear valores en caso de que hayan sido editados y editar
                         else {
                             bodega.setPesoMax(peso_max);
                             bodega.setVolumenMax(volumen_max);
                             
-                            editProducto(bodega, index);
+                            editBodega(bodega, row);
                             
                             frame.setVisible(false);
                         }
@@ -182,9 +189,10 @@ public class ControladorBodega {
     private void insertBodega(float peso_max, float volumen_max) {
         ModeloBodega bodega = new ModeloBodega(peso_max, volumen_max);
         
+        // Si fue posible insertar bodega en el almacen seleccionado
         if (dao_bodega.insert(bodega, almacen.getId())) {
             lista_bodegas.add(bodega);
-            
+            // Introducir bodega nueva en la tabla
             ((DefaultTableModel) vista_bodega.table_bodega.getModel()).addRow(new Object[] {
                 bodega.getId(),
                 abs(bodega.getId()),
@@ -199,14 +207,15 @@ public class ControladorBodega {
         }
     }
     
-    private void editProducto(ModeloBodega bodega, int index) {
+    private void editBodega(ModeloBodega bodega, int row) {
+        // Si se pudo editar
         if (dao_bodega.update(bodega)) {           
             // Obtener modelo de la tabla
             DefaultTableModel modelo_tabla = (DefaultTableModel) vista_bodega.table_bodega.getModel();
             
-            // Editar la tabla en el index especificado
-            modelo_tabla.setValueAt(bodega.getPesoMax(), index, 2);
-            modelo_tabla.setValueAt(bodega.getVolumenMax(), index, 3);
+            // Editar la tabla en el row especificado
+            modelo_tabla.setValueAt(bodega.getPesoMax(), row, 2);
+            modelo_tabla.setValueAt(bodega.getVolumenMax(), row, 3);
             
             JOptionPane.showMessageDialog(null, "Bodega editada");
         }
@@ -215,7 +224,7 @@ public class ControladorBodega {
         }
     }
 
-    private void disableBodega(ModeloBodega bodega, String title, int index) {
+    private void disableBodega(ModeloBodega bodega, String title, int row) {
         String message;
         
         if (bodega.getId() < 0) {
@@ -230,7 +239,7 @@ public class ControladorBodega {
             if (dao_bodega.disable(bodega)) {
                 bodega.setId(bodega.getId()*-1);
 
-                ((DefaultTableModel) vista_bodega.table_bodega.getModel()).setValueAt(bodega.getId(), index, 0);
+                ((DefaultTableModel) vista_bodega.table_bodega.getModel()).setValueAt(bodega.getId(), row, 0);
 
                 JOptionPane.showMessageDialog(null, "Producto "+message+"do");
             }

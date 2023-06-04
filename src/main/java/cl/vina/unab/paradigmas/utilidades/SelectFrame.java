@@ -1,4 +1,4 @@
-package cl.vina.unab.paradigmas.main.utilidades;
+package cl.vina.unab.paradigmas.utilidades;
 
 public class SelectFrame extends javax.swing.JFrame {
     

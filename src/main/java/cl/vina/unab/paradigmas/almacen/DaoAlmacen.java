@@ -17,7 +17,8 @@ public class DaoAlmacen extends DaoMain {
             this.connect();
    
             ResultSet result = connection.prepareStatement("SELECT * FROM almacenes").executeQuery();
-            
+            // Ya que no es posible hacer return a un ResultSet luego de que se haya cerrado la conexion
+            // Se guardar almacenes en una lista
             while (result.next()) {
                 lista_almacenes.add(new ModeloAlmacen(
                         result.getInt(1),
@@ -47,6 +48,7 @@ public class DaoAlmacen extends DaoMain {
             statement.setString(2,almacen.getDireccion());
             statement.executeUpdate();
             
+            // Obtener ultima id de objeto recientemente insertado
             ResultSet result = connection.prepareStatement("SELECT LAST_INSERT_ID() FROM almacenes").executeQuery();
             
             if (result.next()) {
@@ -88,7 +90,7 @@ public class DaoAlmacen extends DaoMain {
     public boolean disable(ModeloAlmacen almacen) {
         try {
             this.connect();
-            
+            // Deshabilitar almacen haciendo que su id sea negativa, evitando que sea seleccionable o editable
             PreparedStatement statement = connection.prepareStatement("UPDATE almacenes SET idAlmacen = ? WHERE idAlmacen = ?");
             statement.setInt(1, almacen.getId() * -1);
             statement.setInt(2, almacen.getId());

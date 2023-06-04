@@ -15,8 +15,8 @@ public class DaoBodega extends DaoMain {
     public boolean select(List<ModeloBodega> lista_bodegas, int id_almacen) {
         try {
             this.connect();
-            
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM bodegas WHERE almacenes_idAlmacen = ?");
+            // Seleccionar casi todo de la bodega en el almacen seleccionado
+            PreparedStatement statement = connection.prepareStatement("SELECT idBodega, peso_max, volumen_max FROM bodegas WHERE almacenes_idAlmacen = ?");
             statement.setInt(1, id_almacen);
             
             ResultSet result = statement.executeQuery();
